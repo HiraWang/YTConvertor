@@ -17,8 +17,14 @@ cnt = 0
 tot_cnt = len(playlist.video_urls)
 for i in playlist.video_urls:
     yt = YouTube(i)
-    print(i, cnt, tot_cnt, yt.author, yt.title)
     fn = str(cnt) + ' ' + str(yt.author) + ' ' + str(yt.title) + '.mp3'
+    fn = fn.replace('/', '')
+    fn = fn.replace('?', '')
+    fn = fn.replace('"', '')
+    fn = fn.replace('～', '')
+    fn = fn.replace('|', '')
+    fn = fn.replace('@', '')
+    print(i, fn)
     yt.streams.filter().get_audio_only().download(filename=fn)
     cnt += 1
 print('ok!')
