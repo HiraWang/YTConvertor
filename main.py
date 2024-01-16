@@ -294,11 +294,11 @@ class BottomView(QWidget):
         self.widget_convertor.setStyleSheet(self.widget_style)
         self.widget_convertor.setLayout(self.layout_convertor)
 
-        self.player = MusicPlayer(self.mp4_root)
+        self.player = MusicPlayer(self.mp3_root)
         self.next_button = Button('Next',
                                   self.button_w,
                                   self.button_h,
-                                  self.player.Previous,
+                                  self.player.next,
                                   color=white_color,
                                   hover_color=light_gray_color,
                                   pressed_color=white_color,
@@ -309,7 +309,7 @@ class BottomView(QWidget):
         self.previous_button = Button('Previous',
                                       self.button_w,
                                       self.button_h,
-                                      self.player.Next,
+                                      self.player.previous,
                                       color=white_color,
                                       hover_color=light_gray_color,
                                       pressed_color=white_color,
@@ -320,8 +320,8 @@ class BottomView(QWidget):
         self.play_button = ButtonTwoState('PLAY', 'PAUSE',
                                           self.button_w,
                                           self.button_h,
-                                          self.player.Play,
-                                          self.player.Stop,
+                                          self.player.play,
+                                          self.player.pause,
                                           color=white_color,
                                           hover_color=light_gray_color,
                                           pressed_color=white_color,

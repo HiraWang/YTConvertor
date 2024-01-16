@@ -1,4 +1,6 @@
 import os
+from os import listdir
+from os.path import isfile, join
 from pygame import *
 from tkinter import *
 from tkinter import filedialog
@@ -10,10 +12,10 @@ class MusicPlayer:
         # creating the root window
         root = Tk()
         root.title('DataFlair Music player App ')
-        # initialize mixer
+        root.withdraw()
+
+        # init mixer para
         mixer.init()
-        mixer.pre_init(44100, 16, 2, 4096)  # frequency, size, channels, buffersize
-        init()  # turn all of pygame on.
 
         self.file_root = file_root
         self.root_path = os.getcwd() + self.file_root
@@ -22,48 +24,46 @@ class MusicPlayer:
         self.songs_list = Listbox(root, selectmode=SINGLE, bg="black", fg="white", font=('arial', 15), height=12, width=47,
                                   selectbackground="gray", selectforeground="black")
         self.songs_list.grid(columnspan=9)
-        self.addsongs()
+        self.add_songs()
 
     # add many songs to the playlist
-    def addsongs(self):
-        # a list of songs is returned
-        temp_song = filedialog.askopenfilenames(initialdir='/Music', title="Choose a song",
-                                                filetypes=(("mp3 Files", "*.mp3"),))
+    def add_songs(self):
+        temp_song = ()
+        files = [f for f in listdir(self.root_path) if isfile(join(self.root_path, f))]
+        for file in files:
+            file = self.root_path.replace('/', '\\') + '\\' + file
+            temp_song = temp_song + (file,)
+
         # loop through everyitem in the list
         for s in temp_song:
             s = s.replace(self.root_path, "")
             self.songs_list.insert(END, s)
 
-
-    def deletesong(self):
+    def delete_song(self):
         curr_song = self.songs_list.curselection()
         self.songs_list.delete(curr_song[0])
 
-
-    def Play(self):
+    def play(self):
         song = self.songs_list.get(ACTIVE)
         song = f'{song}'.replace('/', '\\')
-        print(song)
-        sound = AudioSegment.from_file("C:\\Users\\cy.wang\\MET\\Alan\\YTConverter\\Music\\MP4\\3 tuki. 一輪花.mp4", "mp4")
-        sound.export("C:\\Users\\cy.wang\\MET\\Alan\\YTConverter\\Music\\MP3\\3 tuki. 一輪花.mp3", format="mp3")
-        mixer.music.load("C:\\Users\\cy.wang\\MET\\Alan\\YTConverter\\Music\\MP3\\3 tuki. 一輪花.mp3")
+        mixer.music.load(song)
         mixer.music.play()
 
     # to pause the song
-    def Pause(self):
+    def pause(self):
         mixer.music.pause()
 
     # to stop the  song
-    def Stop(self):
+    def stop(self):
         mixer.music.stop()
         self.songs_list.selection_clear(ACTIVE)
 
     # to resume the song
-    def Resume(self):
+    def resume(self):
         mixer.music.unpause()
 
     # Function to navigate from the current song
-    def Previous(self):
+    def previous(self):
         # to get the selected song index
         previous_one = self.songs_list.curselection()
         # to get the previous song index
@@ -79,7 +79,8 @@ class MusicPlayer:
         # set the next song
         self.songs_list.selection_set(previous_one)
 
-    def Next(self):
+    def next(self):
+        print(self.songs_list)
         # to get the selected song index
         next_one = self.songs_list.curselection()
         # to get the next song index
