@@ -12,18 +12,18 @@ light_gray_color = "rgb(200, 200, 200)"
 deep_white_color = "rgb(240, 240, 240)"
 deep_gray_color = "rgb(90, 90, 90)"
 
-button_color = "#36c7c9"
-button_hover_color = "rgb(47, 175, 178)"
-button_pressed_color = "#24878a"
+button_color = "#a5ffd6"
+button_hover_color = "#95ffd6"
+button_pressed_color = "#7bffd6"
 pressed_button_color = "#e3170d"
 pressed_button_hover_color = "#cb150c"
 pressed_button_pressed_color = "#b8130b"
 
 pulse_color = "#a6ffffd9"
 
-handle_color = "#2a2a2a"
-handle_hover_color = "#0066cc"
-handle_pressed_color = "#0059b3"
+handle_color = "#f0bcc8"
+handle_hover_color = "#e4bcc8"
+handle_pressed_color = "#ddbcc8"
 widget_background_color = "#ccffff"
 
 

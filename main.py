@@ -225,8 +225,8 @@ class BottomView(QWidget):
                                              self.button_h,
                                              self.open_mp3_folder,
                                              color=white_color,
-                                             hover_color=light_gray_color,
-                                             pressed_color=white_color,
+                                             hover_color=handle_color,
+                                             pressed_color=handle_pressed_color,
                                              font_size=self.size_handler.font_size,
                                              font_color="black",
                                              is_icon=True,
@@ -236,8 +236,8 @@ class BottomView(QWidget):
                                              self.button_h,
                                              self.open_mp4_folder,
                                              color=white_color,
-                                             hover_color=light_gray_color,
-                                             pressed_color=white_color,
+                                             hover_color=handle_color,
+                                             pressed_color=handle_pressed_color,
                                              font_size=self.size_handler.font_size,
                                              font_color="black",
                                              is_icon=True,
@@ -258,8 +258,8 @@ class BottomView(QWidget):
                                              self.start_pytube,
                                              self.stop_pytube,
                                              color=white_color,
-                                             hover_color=light_gray_color,
-                                             pressed_color=white_color,
+                                             hover_color=handle_color,
+                                             pressed_color=handle_pressed_color,
                                              font_size=self.size_handler.font_size,
                                              font_color=white_color,
                                              is_icon=True,
@@ -271,8 +271,8 @@ class BottomView(QWidget):
                                             self.start_pydub,
                                             self.stop_pydub,
                                             color=white_color,
-                                            hover_color=light_gray_color,
-                                            pressed_color=white_color,
+                                            hover_color=handle_color,
+                                            pressed_color=handle_pressed_color,
                                             font_size=self.size_handler.font_size,
                                             font_color=white_color,
                                             is_icon=True,
@@ -323,22 +323,77 @@ class BottomView(QWidget):
 
         self.song_list.setFixedHeight(500)
         self.song_list.setStyleSheet("""
-                                             QListWidget{
-                                                color: """ + deep_gray_color + """;
-                                                background: """ + light_gray_color + """;
-                                             }
-                                             QListWidget::item:selected{
-                                                color: """ + white_color + """;
-                                                background: """ + deep_gray_color + """;
-                                             }
-                                             """)
+                                     QListWidget{
+                                        border-radius: 0px;
+                                        color: """ + deep_gray_color + """;
+                                        background: """ + light_gray_color + """;
+                                     }
+                                     QListWidget::item:hover{
+                                        color: """ + black_color + """;
+                                        background: """ + handle_color + """;
+                                     }
+                                     QListWidget::item:selected{
+                                        color: """ + black_color + """;
+                                        background: """ + button_color + """;
+                                     }
+                                     QScrollBar:vertical {
+                                        border-left: 2px solid black;
+                                        border-right: 0px solid black;
+                                        background: """ + gray_color + """;
+                                        width: 25px;
+                                        margin: 15px 0 15px 0;
+                                        border-radius: 0px;
+                                     }
+                                     QScrollBar::handle:vertical {
+                                        background-color: """ + handle_color + """;
+                                        min-height: 30px;
+                                     }
+                                     QScrollBar::handle:vertical:hover {
+                                        background-color: """ + deep_white_color + """;
+                                     }
+                                     QScrollBar::handle:vertical:pressed {
+                                        background-color: """ + light_gray_color + """;
+                                     }
+                                     QScrollBar::sub-line:vertical {
+                                        border-left: 2px solid black;
+                                        background-color: """ + button_color + """;
+                                        height: 15px;
+                                        subcontrol-position: top;
+                                        subcontrol-origin: margin;
+                                     }
+                                     QScrollBar::sub-line:vertical:hover {
+                                        background-color: """ + deep_white_color + """;
+                                     }
+                                     QScrollBar::sub-line:vertical:pressed {
+                                        background-color: """ + light_gray_color + """;
+                                     }
+                                     QScrollBar::add-line:vertical {
+                                        border-left: 2px solid black;
+                                        background-color: """ + button_color + """;
+                                        height: 15px;
+                                        subcontrol-position: bottom;
+                                        subcontrol-origin: margin;
+                                     }
+                                     QScrollBar::add-line:vertical:hover {
+                                        background-color: """ + deep_white_color + """;
+                                     }
+                                     QScrollBar::add-line:vertical:pressed { 
+                                        background-color: """ + light_gray_color + """;
+                                     }
+                                     QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+                                        background: none;
+                                     }
+                                     QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                                        background: none;
+                                     }
+                                     """)
         self.next_button = Button('Next',
                                   self.button_w,
                                   self.button_h,
                                   self.next,
                                   color=white_color,
-                                  hover_color=light_gray_color,
-                                  pressed_color=white_color,
+                                  hover_color=handle_color,
+                                  pressed_color=handle_pressed_color,
                                   font_size=self.size_handler.font_size,
                                   font_color="black",
                                   is_icon=True,
@@ -348,8 +403,8 @@ class BottomView(QWidget):
                                       self.button_h,
                                       self.previous,
                                       color=white_color,
-                                      hover_color=light_gray_color,
-                                      pressed_color=white_color,
+                                      hover_color=handle_color,
+                                      pressed_color=handle_pressed_color,
                                       font_size=self.size_handler.font_size,
                                       font_color="black",
                                       is_icon=True,
@@ -360,8 +415,8 @@ class BottomView(QWidget):
                                           self.player.play,
                                           self.player.stop,
                                           color=white_color,
-                                          hover_color=light_gray_color,
-                                          pressed_color=white_color,
+                                          hover_color=handle_color,
+                                          pressed_color=handle_pressed_color,
                                           font_size=self.size_handler.font_size,
                                           font_color=white_color,
                                           is_icon=True,
@@ -373,8 +428,8 @@ class BottomView(QWidget):
                                            self.player.pause,
                                            self.player.resume,
                                            color=white_color,
-                                           hover_color=light_gray_color,
-                                           pressed_color=white_color,
+                                           hover_color=handle_color,
+                                           pressed_color=handle_pressed_color,
                                            font_size=self.size_handler.font_size,
                                            font_color=white_color,
                                            is_icon=True,
@@ -404,7 +459,7 @@ class BottomView(QWidget):
         item.setText(name)
         item.setIcon(QIcon(icon))
         item.setStatusTip(name)
-        item.setTextAlignment(Qt.AlignLeft)
+        item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         return item
 
