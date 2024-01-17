@@ -78,6 +78,57 @@ class Button(QPushButton):
         self.clicked.connect(self.callback_default)
 
 
+class ButtonRect(QPushButton):
+    def __init__(self,
+                 name,
+                 w,
+                 h,
+                 callback_default=None,
+                 color: str = button_color,
+                 hover_color: str = button_hover_color,
+                 pressed_color: str = button_pressed_color,
+                 font_size: str = "20px",
+                 font_color: str = black_color,
+                 is_icon: bool = False,
+                 icon: str = None):
+        super().__init__()
+        self.name = name
+        self.info_default = """
+                            QPushButton {
+                                background-color: """ + color + """; 
+                                border: 2px solid black;
+                                border-radius: 5px;
+                                font: bold """ + font_size + """;
+                                color: """ + font_color + """
+                            }
+                            QPushButton:hover {
+                                background-color: """ + hover_color + """; 
+                                border: 2px solid black;
+                                border-radius: 3px;
+                                font: bold """ + font_size + """;
+                                color: """ + font_color + """                                
+                            }
+                            QPushButton:pressed {
+                                background-color: """ + pressed_color + """; 
+                                border: 2px solid black;
+                                border-radius: 5px;
+                                font: bold """ + font_size + """;
+                                color: """ + font_color + """
+                            }
+                            """
+        self.callback_default = callback_default
+        if is_icon:
+            self.setIcon(QIcon(icon))
+            self.setIconSize(QSize(w, h))
+        else:
+            self.setText(name)
+        self.setFixedWidth(w)
+        self.setFixedHeight(h)
+        self.setStyleSheet(self.info_default)
+        self.status = False
+        self.clicked.connect(self.callback_default)
+
+
 class ButtonTwoState(QPushButton):
     def __init__(self,
                  name_default,

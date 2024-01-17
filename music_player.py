@@ -38,6 +38,7 @@ class MusicPlayer:
         for s in temp_song:
             s = s.replace(self.root_path, "")
             self.songs_list.insert(END, s)
+        print("songs added")
 
     def delete_song(self):
         curr_song = self.songs_list.curselection()

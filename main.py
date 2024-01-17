@@ -55,6 +55,7 @@ def convert_playlist(urls, file_root, info_root, extension):
             cnt += 1
         else:
             break
+    print('playlist conversion finished')
     return
 
 
@@ -74,6 +75,7 @@ def convert_audio(mp4_root, mp3_root, extension_mp4, extension_mp3):
                 continue
         else:
             break
+    print('audio conversion finished')
     return
 
 
@@ -142,8 +144,14 @@ class UpperView(QWidget):
 class BottomView(QWidget):
     def __init__(self, window, device, size):
         super().__init__()
-
         self.window = window
+        self.mp4_root = '/Music/MP4'
+        self.mp3_root = '/Music/MP3'
+        self.info_root = '/Info'
+        self.extension_mp4 = '.mp4'
+        self.extension_mp3 = '.mp3'
+        self.player = MusicPlayer(self.mp3_root)
+
         self.size_handler = SizeHandler(BOTTOM_VIEW, size)
         self.label_w = self.size_handler.label_w
         self.label_h = self.size_handler.label_h
@@ -156,8 +164,7 @@ class BottomView(QWidget):
         self.button_w = self.size_handler.button_w
         self.button_h = self.size_handler.button_h
         self.widget_w = 700
-        self.widget_h = 850
-
+        self.widget_h = 800
         self.label_style = """
                            border: 0px;
                            color: white; 
@@ -170,19 +177,21 @@ class BottomView(QWidget):
                           """
         self.line_edit_style = """ 
                                QLineEdit  {
-                                   background-color: white; 
+                                   background-color: """ + white_color + """; 
                                    border: 2px solid black;
                                    border-radius: 2px;
+                                   color: """ + deep_gray_color + """; 
                                    font: """ + self.size_handler.font_size + """
                                }
                                """
         self.widget_style = """ 
                             QWidget  {
                                 border: 2px solid black;
-                                background-color: """ + deep_gray_color + """; 
+                                background-color: """ + light_black_color + """; 
                                 border-radius: 10px;
                             }
                             """
+
         self.playlist_label = QLabel(self)
         self.playlist_label.setFixedWidth(self.label_w)
         self.playlist_label.setFixedHeight(self.label_h)
@@ -192,28 +201,48 @@ class BottomView(QWidget):
         self.playlist_edit.setStyleSheet(self.line_edit_style)
         self.playlist_edit.setFixedWidth(self.edit_w)
         self.playlist_edit.setFixedHeight(self.edit_h)
-        self.open_result_folder_button = Button('RESULT',
-                                                self.button_w,
-                                                self.button_h,
-                                                self.open_result_folder,
-                                                color=white_color,
-                                                hover_color=light_gray_color,
-                                                pressed_color=gray_color,
-                                                font_size=self.size_handler.font_size,
-                                                font_color="black",
-                                                is_icon=True,
-                                                icon=IMAGE_MUSIC)
-        self.open_info_folder_button = Button('INFO',
+        self.playlist_set_button = ButtonRect('SET',
                                               self.button_w,
-                                              self.button_h,
-                                              self.open_info_folder,
+                                              self.edit_h,
+                                              self.set_playlist,
                                               color=white_color,
                                               hover_color=light_gray_color,
-                                              pressed_color=gray_color,
+                                              pressed_color=white_color,
                                               font_size=self.size_handler.font_size,
                                               font_color="black",
-                                              is_icon=True,
-                                              icon=IMAGE_ATTACHED_FILES)
+                                              is_icon=False)
+        self.add_song_button = ButtonRect('ADD',
+                                          self.button_w,
+                                          self.edit_h,
+                                          self.player.add_songs,
+                                          color=white_color,
+                                          hover_color=light_gray_color,
+                                          pressed_color=white_color,
+                                          font_size=self.size_handler.font_size,
+                                          font_color="black",
+                                          is_icon=False)
+        self.open_mp3_folder_button = Button('MP3',
+                                             self.button_w,
+                                             self.button_h,
+                                             self.open_mp3_folder,
+                                             color=white_color,
+                                             hover_color=light_gray_color,
+                                             pressed_color=white_color,
+                                             font_size=self.size_handler.font_size,
+                                             font_color="black",
+                                             is_icon=True,
+                                             icon=IMAGE_MUSIC)
+        self.open_mp4_folder_button = Button('MP4',
+                                             self.button_w,
+                                             self.button_h,
+                                             self.open_mp4_folder,
+                                             color=white_color,
+                                             hover_color=light_gray_color,
+                                             pressed_color=white_color,
+                                             font_size=self.size_handler.font_size,
+                                             font_color="black",
+                                             is_icon=True,
+                                             icon=IMAGE_MUSIC)
         self.msg_box_pytube = MessageBox(self.size_handler.msg_w / 2,
                                          self.size_handler.msg_h,
                                          color=light_gray_color,
@@ -251,15 +280,14 @@ class BottomView(QWidget):
                                             icon_default=IMAGE_EXPORT,
                                             icon_pressed=IMAGE_STOP)
 
+        self.playlist = 'https://youtube.com/playlist?list=PLFdgdNMl_r3Ks7Au7SFJiRaMXwWrdikxR&si=ejV4p3yJ2QZpbaW4'
+        self.playlist_edit.setText(self.playlist)
+        self.playlist_edit.setCursorPosition(0)
         self.thread_pytube = None
         self.timer_pytube = QTimer()
         self.timer_pytube.timeout.connect(self.update_pytube_status)
-        self.mp4_root = '/Music/MP4'
-        self.mp3_root = '/Music/MP3'
-        self.info_root = '/Info'
-        self.extension_mp4 = '.mp4'
-        self.extension_mp3 = '.mp3'
 
+        self.tot_cnt = 0
         self.mp4_max_cnt = 0
         self.mp3_max_cnt = 0
         self.yt_title = []
@@ -277,6 +305,10 @@ class BottomView(QWidget):
         self.layout_playlist.addWidget(self.playlist_label)
         self.layout_playlist.addWidget(self.playlist_edit)
         self.layout_playlist.addStretch(1)
+        self.layout_playlist.addWidget(self.playlist_set_button)
+        self.layout_playlist.addStretch(1)
+        self.layout_playlist.addWidget(self.add_song_button)
+        self.layout_playlist.addStretch(1)
         self.layout_convertor.addItem(self.layout_playlist)
         self.layout_msg_box = QHBoxLayout()
         self.layout_msg_box.addWidget(self.msg_box_pytube)
@@ -284,8 +316,8 @@ class BottomView(QWidget):
         self.layout_convertor.addItem(self.layout_msg_box)
         self.layout_convertor_button = QHBoxLayout()
         self.layout_convertor_button.addWidget(self.convert_button, alignment=Qt.AlignCenter)
-        self.layout_convertor_button.addWidget(self.open_info_folder_button, alignment=Qt.AlignCenter)
-        self.layout_convertor_button.addWidget(self.open_result_folder_button, alignment=Qt.AlignCenter)
+        self.layout_convertor_button.addWidget(self.open_mp4_folder_button, alignment=Qt.AlignCenter)
+        self.layout_convertor_button.addWidget(self.open_mp3_folder_button, alignment=Qt.AlignCenter)
         self.layout_convertor_button.addWidget(self.export_button, alignment=Qt.AlignCenter)
         self.layout_convertor.addItem(self.layout_convertor_button)
         self.widget_convertor = QWidget()
@@ -294,7 +326,6 @@ class BottomView(QWidget):
         self.widget_convertor.setStyleSheet(self.widget_style)
         self.widget_convertor.setLayout(self.layout_convertor)
 
-        self.player = MusicPlayer(self.mp3_root)
         self.next_button = Button('Next',
                                   self.button_w,
                                   self.button_h,
@@ -317,11 +348,11 @@ class BottomView(QWidget):
                                       font_color="black",
                                       is_icon=True,
                                       icon=IMAGE_PREVIOUS)
-        self.play_button = ButtonTwoState('PLAY', 'PAUSE',
+        self.play_button = ButtonTwoState('PLAY', 'STOP',
                                           self.button_w,
                                           self.button_h,
                                           self.player.play,
-                                          self.player.pause,
+                                          self.player.stop,
                                           color=white_color,
                                           hover_color=light_gray_color,
                                           pressed_color=white_color,
@@ -329,12 +360,26 @@ class BottomView(QWidget):
                                           font_color=white_color,
                                           is_icon=True,
                                           icon_default=IMAGE_PLAY_BLANK,
-                                          icon_pressed=IMAGE_PAUSE_BLANK)
+                                          icon_pressed=IMAGE_STOP_BLANK)
+        self.pause_button = ButtonTwoState('PAUSE', 'RESUME',
+                                           self.button_w,
+                                           self.button_h,
+                                           self.player.pause,
+                                           self.player.resume,
+                                           color=white_color,
+                                           hover_color=light_gray_color,
+                                           pressed_color=white_color,
+                                           font_size=self.size_handler.font_size,
+                                           font_color=white_color,
+                                           is_icon=True,
+                                           icon_default=IMAGE_PAUSE_BLANK,
+                                           icon_pressed=IMAGE_PLAY_BLANK)
 
         self.layout_player = QVBoxLayout()
         self.layout_player_button = QHBoxLayout()
         self.layout_player_button.addWidget(self.previous_button)
         self.layout_player_button.addWidget(self.play_button)
+        self.layout_player_button.addWidget(self.pause_button)
         self.layout_player_button.addWidget(self.next_button)
         self.layout_player.addItem(self.layout_player_button)
         self.widget_player = QWidget()
@@ -347,15 +392,19 @@ class BottomView(QWidget):
         self.layout.addWidget(self.widget_player)
         self.setLayout(self.layout)
 
-    def open_result_folder(self):
+    def set_playlist(self):
+        self.playlist = self.playlist_edit.text()
+        self.tot_cnt = len(Playlist(self.playlist).video_urls)
+
+    def open_mp3_folder(self):
         path = os.path.realpath(os.getcwd() + self.mp3_root)
         if sys.platform == "darwin":
             subprocess.call(["open", path])
         else:
             os.startfile(path)
 
-    def open_info_folder(self):
-        path = os.path.realpath(os.getcwd() + self.info_root)
+    def open_mp4_folder(self):
+        path = os.path.realpath(os.getcwd() + self.mp4_root)
         if sys.platform == "darwin":
             subprocess.call(["open", path])
         else:
@@ -383,8 +432,7 @@ class BottomView(QWidget):
         global pytube_trigger
         pytube_trigger = True
 
-        playlist = 'https://youtube.com/playlist?list=PLFdgdNMl_r3Ks7Au7SFJiRaMXwWrdikxR&si=ejV4p3yJ2QZpbaW4'
-        # playlist = self.playlist_edit.text()
+        playlist = self.playlist_edit.text()
         playlist = Playlist(playlist)
 
         self.init_pytube()
@@ -442,7 +490,7 @@ class Window(QMainWindow):
         icon.addFile(os.getcwd() + IMAGE_MET_ICON)
         self.setWindowIcon(icon)
         self.setStyleSheet("""
-                           QMainWindow > QWidget { background-color: """ + deep_white_color + """; }
+                           QMainWindow > QWidget { background-color: """ + gray_color + """; }
                            """)
 
         # New a main widget for window
