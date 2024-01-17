@@ -46,21 +46,21 @@ class Button(QPushButton):
                             QPushButton {
                                 background-color: """ + color + """; 
                                 border: 2px solid black;
-                                border-radius: 5px;
+                                border-radius: """ + str(w/2) + """;
                                 font: bold """ + font_size + """;
                                 color: """ + font_color + """
                             }
                             QPushButton:hover {
                                 background-color: """ + hover_color + """; 
                                 border: 2px solid black;
-                                border-radius: 5px;
+                                border-radius: """ + str(w/2 - 10) + """;
                                 font: bold """ + font_size + """;
                                 color: """ + font_color + """                                
                             }
                             QPushButton:pressed {
                                 background-color: """ + pressed_color + """; 
                                 border: 2px solid black;
-                                border-radius: 5px;
+                                border-radius: """ + str(w/2) + """;
                                 font: bold """ + font_size + """;
                                 color: """ + font_color + """
                             }
@@ -109,44 +109,44 @@ class ButtonTwoState(QPushButton):
                             QPushButton {
                                 background-color: """ + color + """; 
                                 border: 2px solid black;
-                                border-radius: 5px;
+                                border-radius: """ + str(w/2) + """;
                                 font: bold """ + font_size + """;
                                 color: """ + font_color + """
                             }
                             QPushButton:hover {
                                 background-color: """ + hover_color + """; 
                                 border: 2px solid black;
-                                border-radius: 5px;
+                                border-radius: """ + str(w/2 - 10) + """;
                                 font: bold """ + font_size + """;
                                 color: """ + font_color + """
                             }
                             QPushButton:pressed {
                                 background-color: """ + pressed_color + """; 
                                 border: 2px solid black;
-                                border-radius: 5px;
+                                border-radius: """ + str(w/2) + """;
                                 font: bold """ + font_size + """;
                                 color: """ + font_color + """
                             }
                             """
         self.info_pressed = """
                             QPushButton {
-                                background-color: """ + color_1 + """; 
+                                background-color: """ + color + """; 
                                 border: 2px solid black;
-                                border-radius: 5px;
+                                border-radius: """ + str(w/2) + """;
                                 font: bold """ + font_size + """;
                                 color: """ + font_color + """
                             }
                             QPushButton:hover {
-                                background-color: """ + hover_color_1 + """; 
+                                background-color: """ + hover_color + """; 
                                 border: 2px solid black;
-                                border-radius: 5px;
+                                border-radius: """ + str(w/2 - 10) + """;
                                 font: bold """ + font_size + """;
                                 color: """ + font_color + """
                             }
                             QPushButton:pressed {
-                                background-color: """ + pressed_color_1 + """; 
+                                background-color: """ + pressed_color + """; 
                                 border: 2px solid black;
-                                border-radius: 5px;
+                                border-radius: """ + str(w/2) + """;
                                 font: bold """ + font_size + """;
                                 color: """ + font_color + """
                             }

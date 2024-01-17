@@ -28,6 +28,11 @@ IMAGE_START = "./images/Start.png"
 IMAGE_STOP = "./images/Stop.png"
 IMAGE_MENU = "./images/Menu.png"
 IMAGE_SETTING = "./images/Setting.png"
+IMAGE_PLAY_BLANK = "./images/StartBlank.png"
+IMAGE_PAUSE_BLANK = "./images/PauseBlank.png"
+IMAGE_NEXT = "./images/Next.png"
+IMAGE_PREVIOUS = "./images/Previous.png"
+IMAGE_EXPORT = "./images/Export.png"
 
 CONSOLE_PERIOD_MAX = 5000
 MONITOR_Q_TIMER_PERIOD = 25
@@ -86,7 +91,7 @@ class SizeHandler():
             print("[INFO] Bottom View UI Scale: ", self.scale)
             self.width = 100
             self.height = 50
-            self.label_w = (self.width + 20) * self.scale
+            self.label_w = self.width * 0.5 * self.scale
             self.label_h = self.height * self.scale
             self.valve_label_w = (self.width + 20) * self.scale
             self.valve_label_h = self.height * self.scale
