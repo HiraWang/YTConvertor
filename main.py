@@ -3,6 +3,7 @@ from os import listdir
 from os.path import isfile, join
 import sys
 import shutil
+import requests
 import threading
 import subprocess
 from pytube import Playlist
@@ -28,13 +29,12 @@ def on_progress(stream, chunk, remains):
     print('=' * percent + ' ' * (100 - percent))
 
 
-def convert_playlist(urls, file_root, info_root, extension):
+def convert_playlist(urls, file_root, info_root, icon_root, extension):
     cnt = 1
     tot_cnt = len(urls)
     for i in urls:
         if pytube_trigger:
             yt = YouTube(i, on_progress_callback=on_progress)
-            # audio = yt.streams.filter(only_audio=True).first()
 
             fn = str(cnt) + ' ' + str(yt.author) + ' ' + str(yt.title) + extension
             fn = fn.replace('/', '')
@@ -44,14 +44,20 @@ def convert_playlist(urls, file_root, info_root, extension):
             fn = fn.replace('|', '')
             fn = fn.replace('@', '')
             print(i, fn)
+
             f = open(os.getcwd() + info_root + '/' + str(cnt) + '.txt', 'w', encoding='UTF-8')
             f.write(str(yt.author) + '\n')
             f.write(str(yt.title) + '\n')
             f.write(str(i) + '\n')
             f.write(str(yt.thumbnail_url) + '\n')
             f.close()
+
             yt.streams.filter().get_audio_only().download(output_path=os.getcwd() + file_root, filename=fn)
-            # audio.download(output_path=os.getcwd() + mp4_root, filename=fn)
+
+            img_data = requests.get(str(yt.thumbnail_url)).content
+            with open(os.getcwd() + icon_root + '/' + str(cnt) + '.jpg', 'wb') as handler:
+                handler.write(img_data)
+
             cnt += 1
         else:
             break
@@ -112,22 +118,6 @@ class UpperView(QWidget):
                                   font_color=white_color,
                                   is_icon=True,
                                   icon=IMAGE_EXIT)
-        self.window_button = ButtonTwoState('Normal', 'FullScreen',
-                                            self.size_handler.button_w,
-                                            self.size_handler.button_w,
-                                            self.window.showMaximized,
-                                            self.window.showFullScreen,
-                                            color=white_color,
-                                            hover_color=light_gray_color,
-                                            pressed_color=gray_color,
-                                            color_1=white_color,
-                                            hover_color_1=light_gray_color,
-                                            pressed_color_1=gray_color,
-                                            font_size=self.size_handler.font_size,
-                                            font_color=white_color,
-                                            is_icon=True,
-                                            icon_default=IMAGE_SHOW_NORMAL,
-                                            icon_pressed=IMAGE_SHOW_FULL_SCREEN)
 
         pixmap = QPixmap(os.getcwd() + IMAGE_MET_LOGO)
         self.logo = QLabel()
@@ -136,7 +126,6 @@ class UpperView(QWidget):
 
         self.layout.addStretch(10)
         self.layout.addWidget(self.exit_button, alignment=Qt.AlignRight)
-        self.layout.addWidget(self.window_button, alignment=Qt.AlignRight)
         self.layout.addWidget(self.logo, alignment=Qt.AlignRight)
         self.setLayout(self.layout)
 
@@ -148,6 +137,7 @@ class BottomView(QWidget):
         self.mp4_root = '/Music/MP4'
         self.mp3_root = '/Music/MP3'
         self.info_root = '/Info'
+        self.icon_root = '/Icon'
         self.extension_mp4 = '.mp4'
         self.extension_mp3 = '.mp3'
         self.player = MusicPlayer(self.mp3_root)
@@ -214,7 +204,7 @@ class BottomView(QWidget):
         self.add_song_button = ButtonRect('ADD',
                                           self.button_w,
                                           self.edit_h,
-                                          self.player.add_songs,
+                                          self.add_songs,
                                           color=white_color,
                                           hover_color=light_gray_color,
                                           pressed_color=white_color,
@@ -375,7 +365,23 @@ class BottomView(QWidget):
                                            icon_default=IMAGE_PAUSE_BLANK,
                                            icon_pressed=IMAGE_PLAY_BLANK)
 
+        # Setup ListWidget
+        self.song_list = QListWidget()
+        self.song_list.setFixedHeight(500)
+        self.song_list.setStyleSheet("""
+                                     QListWidget{
+                                        color: """ + deep_gray_color + """;
+                                        background: """ + light_gray_color + """;
+                                     }
+                                     QListWidget::item:selected{
+                                        color: """ + white_color + """;
+                                        background: """ + deep_gray_color + """;
+                                     }
+                                     """)
+        self._list_items = list()
+
         self.layout_player = QVBoxLayout()
+        self.layout_player.addWidget(self.song_list, alignment=Qt.AlignTop)
         self.layout_player_button = QHBoxLayout()
         self.layout_player_button.addWidget(self.previous_button)
         self.layout_player_button.addWidget(self.play_button)
@@ -383,7 +389,7 @@ class BottomView(QWidget):
         self.layout_player_button.addWidget(self.next_button)
         self.layout_player.addItem(self.layout_player_button)
         self.widget_player = QWidget()
-        self.widget_player.setFixedWidth(self.widget_w)
+        self.widget_player.setFixedWidth(self.widget_w * 1.2)
         self.widget_player.setFixedHeight(self.widget_h)
         self.widget_player.setStyleSheet(self.widget_style)
         self.widget_player.setLayout(self.layout_player)
@@ -391,6 +397,44 @@ class BottomView(QWidget):
         self.layout.addWidget(self.widget_convertor)
         self.layout.addWidget(self.widget_player)
         self.setLayout(self.layout)
+
+    def create_item(self, name, icon, parent):
+        item = QListWidgetItem(parent)
+        item.setText(name)
+        item.setIcon(QIcon(icon))
+        item.setStatusTip(name)
+        item.setTextAlignment(Qt.AlignLeft)
+        item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        return item
+
+    def get_info_and_icon_files(self):
+        info_files = [f for f in listdir(os.getcwd() + self.info_root) if isfile(join(os.getcwd() + self.info_root, f))]
+        icon_files = [f for f in listdir(os.getcwd() + self.icon_root) if isfile(join(os.getcwd() + self.icon_root, f))]
+        return info_files, icon_files
+
+    def update_list_widget(self):
+        info_files, icon_files = self.get_info_and_icon_files()
+        for info_file, icon_file in zip(info_files, icon_files):
+            info_file = os.getcwd() + self.info_root + '/' + info_file
+            icon_file = os.getcwd() + self.icon_root + '/' + icon_file
+            f = open(info_file, 'r', encoding='UTF-8')
+            content = f.read()
+            content = content.splitlines()
+            self._list_items.append(self.create_item(content[0] + ' ' + content[1],
+                                                     icon_file,
+                                                     self.song_list))
+
+        self.song_list.setCurrentRow(0)
+        self.song_list.setViewMode(QListView.ListMode)
+        self.song_list.setSpacing(1)
+        self.song_list.setItemAlignment(Qt.AlignCenter)
+        self.song_list.setEnabled(True)
+        self.song_list.setIconSize(QSize(128, 72))
+
+    def add_songs(self):
+        self.song_list.clear()
+        self.update_list_widget()
+        self.player.add_songs
 
     def set_playlist(self):
         self.playlist = self.playlist_edit.text()
@@ -417,6 +461,8 @@ class BottomView(QWidget):
         os.mkdir(os.getcwd() + self.mp4_root)
         shutil.rmtree(os.getcwd() + self.info_root, ignore_errors=True)
         os.mkdir(os.getcwd() + self.info_root)
+        shutil.rmtree(os.getcwd() + self.icon_root, ignore_errors=True)
+        os.mkdir(os.getcwd() + self.icon_root)
 
     def update_pytube_status(self):
         max_len = len(os.listdir(os.getcwd() + self.mp4_root))
@@ -437,7 +483,11 @@ class BottomView(QWidget):
 
         self.init_pytube()
         self.thread_pytube = threading.Thread(target=convert_playlist,
-                                              args=(playlist.video_urls, self.mp4_root, self.info_root, self.extension_mp4))
+                                              args=(playlist.video_urls,
+                                                    self.mp4_root,
+                                                    self.info_root,
+                                                    self.icon_root,
+                                                    self.extension_mp4))
         self.thread_pytube.start()
         self.timer_pytube.start(1)
 
