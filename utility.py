@@ -96,9 +96,9 @@ class SizeHandler():
             self.label_h = self.height * self.scale
             self.valve_label_w = (self.width + 20) * self.scale
             self.valve_label_h = self.height * self.scale
-            self.msg_w = 645 * self.scale
-            self.msg_h = 600 * self.msg_scale
-            self.edit_w = (self.width + 10) * 3.5 * self.scale
+            self.msg_w = 390 * self.scale
+            self.msg_h = 550 * self.msg_scale
+            self.edit_w = self.width * 5.2 * self.scale
             self.edit_h = (self.height - 10) * self.scale
             self.message_box_w = (self.width * 3) * self.scale
             self.message_box_h = self.height * self.msg_scale

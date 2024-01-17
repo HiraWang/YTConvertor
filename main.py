@@ -242,12 +242,12 @@ class BottomView(QWidget):
                                              font_color="black",
                                              is_icon=True,
                                              icon=IMAGE_MUSIC)
-        self.msg_box_pytube = MessageBox(self.size_handler.msg_w / 2,
+        self.msg_box_pytube = MessageBox(self.size_handler.msg_w,
                                          self.size_handler.msg_h,
                                          color=light_gray_color,
                                          font_size=self.size_handler.msg_font_size,
                                          font_color=black_color)
-        self.msg_box_pydub = MessageBox(self.size_handler.msg_w / 2,
+        self.msg_box_pydub = MessageBox(self.size_handler.msg_w,
                                         self.size_handler.msg_h,
                                         color=light_gray_color,
                                         font_size=self.size_handler.msg_font_size,
@@ -306,8 +306,8 @@ class BottomView(QWidget):
         self.layout_playlist.addStretch(1)
         self.layout_convertor.addItem(self.layout_playlist)
         self.layout_msg_box = QHBoxLayout()
-        self.layout_msg_box.addWidget(self.msg_box_pytube)
-        self.layout_msg_box.addWidget(self.msg_box_pydub)
+        self.layout_msg_box.addWidget(self.msg_box_pytube, alignment=Qt.AlignCenter)
+        self.layout_msg_box.addWidget(self.msg_box_pydub, alignment=Qt.AlignCenter)
         self.layout_convertor.addItem(self.layout_msg_box)
         self.layout_convertor_button = QHBoxLayout()
         self.layout_convertor_button.addWidget(self.convert_button, alignment=Qt.AlignCenter)
@@ -316,7 +316,7 @@ class BottomView(QWidget):
         self.layout_convertor_button.addWidget(self.export_button, alignment=Qt.AlignCenter)
         self.layout_convertor.addItem(self.layout_convertor_button)
         self.widget_convertor = QWidget()
-        self.widget_convertor.setFixedWidth(self.widget_w)
+        self.widget_convertor.setFixedWidth(self.widget_w * 1.2)
         self.widget_convertor.setFixedHeight(self.widget_h)
         self.widget_convertor.setStyleSheet(self.widget_style)
         self.widget_convertor.setLayout(self.layout_convertor)
@@ -450,8 +450,9 @@ class BottomView(QWidget):
         self.widget_player.setStyleSheet(self.widget_style)
         self.widget_player.setLayout(self.layout_player)
 
-        self.layout.addWidget(self.widget_convertor)
-        self.layout.addWidget(self.widget_player)
+        self.layout.addWidget(self.widget_convertor, alignment=Qt.AlignLeft | Qt.AlignBottom)
+        self.layout.addStretch(1)
+        self.layout.addWidget(self.widget_player, alignment=Qt.AlignRight | Qt.AlignBottom)
         self.setLayout(self.layout)
 
     def create_item(self, name, icon, parent):

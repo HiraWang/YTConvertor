@@ -1,18 +1,24 @@
 import os
+import sys
 from os import listdir
 from os.path import isfile, join
+import threading
+import multiprocessing
 from pygame import *
 from tkinter import *
 from tkinter import filedialog
 from pydub import AudioSegment
+from audio_analyzer import *
+from audio_visualizer import *
+import pygetwindow
 
 
 class MusicPlayer:
     def __init__(self, list, file_root):
         # creating the root window
-        root = Tk()
-        root.title('DataFlair Music player App ')
-        root.withdraw()
+        self.root = Tk()
+        self.root.title('DataFlair Music player App ')
+        self.root.withdraw()
 
         # init mixer para
         mixer.init()
@@ -21,12 +27,8 @@ class MusicPlayer:
         self.list_cnt = 0
         self.file_root = file_root
         self.root_path = os.getcwd() + self.file_root
-
-        # create the listbox to contain songs
+        self.visualizer = None
         self.song_list = []
-        # self.songs_list = Listbox(root, selectmode=SINGLE, bg="black", fg="white", font=('arial', 15), height=12, width=47,
-        #                           selectbackground="gray", selectforeground="black")
-        # self.songs_list.grid(columnspan=9)
         self.add_songs()
 
     # add many songs to the playlist
@@ -47,15 +49,22 @@ class MusicPlayer:
         song = os.getcwd() + self.file_root + '/' + self.list.currentItem().text()
         mixer.music.load(song)
         mixer.music.play()
+        self.visualizer = AudioVisualizer(song)
+        # p = multiprocessing.Process(target=AudioVisualizer, args=(song,))
+        # p.start()
 
     def stop(self):
         mixer.music.stop()
+        pygame.display.quit()
 
     def pause(self):
         mixer.music.pause()
-
-    def stop(self):
-        mixer.music.stop()
+        self.alwaysOnTop()
 
     def resume(self):
         mixer.music.unpause()
+        self.alwaysOnTop()
+
+    def alwaysOnTop(self):
+        putty = pygetwindow.getWindowsWithTitle('pygame')[0]
+        putty.activate()
