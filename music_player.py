@@ -1,14 +1,7 @@
-import os
-import sys
 from os import listdir
 from os.path import isfile, join
-import threading
-import multiprocessing
 from pygame import *
 from tkinter import *
-from tkinter import filedialog
-from pydub import AudioSegment
-from audio_analyzer import *
 from audio_visualizer import *
 import pygetwindow
 

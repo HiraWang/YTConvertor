@@ -1,17 +1,9 @@
-import functools
-import os
-from os import listdir
-from os.path import isfile, join
 import sys
 import shutil
 import requests
-import threading
 import subprocess
 from pytube import Playlist
 from pytube import YouTube
-from PySide2.QtWidgets import *
-from PySide2.QtCore import *
-from PySide2.QtGui import *
 from music_player import *
 from utility import *
 from ui_unit import *
@@ -567,6 +559,7 @@ class BottomView(QWidget):
 
     def previous(self):
         self.stop()
+        self.play_button.button_status_set_true()
 
         if self.mp3_max_cnt == 0:
             return
@@ -581,9 +574,11 @@ class BottomView(QWidget):
         self.song_list.currentItem().setSelected(True)
 
         self.play()
+        self.play_button.button_status_set_false()
 
     def next(self):
         self.stop()
+        self.play_button.button_status_set_true()
 
         if self.mp3_max_cnt == 0:
             return
@@ -598,6 +593,7 @@ class BottomView(QWidget):
         self.song_list.currentItem().setSelected(True)
 
         self.play()
+        self.play_button.button_status_set_false()
 
     def play_at_current_time(self):
         if abs(self.progress_bar.value() - self.pre_progress_bar_value) <= 1:
