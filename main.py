@@ -556,7 +556,6 @@ class BottomView(QWidget):
         for info_file, icon_file in zip(info_files, icon_files):
             info_file = os.getcwd() + self.info_root + '/' + info_file
             icon_file = os.getcwd() + self.icon_root + '/' + icon_file
-            print(info_file)
             f = open(info_file, 'r', encoding='UTF-8')
             content = f.read()
             content = content.splitlines()
