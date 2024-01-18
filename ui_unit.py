@@ -258,6 +258,56 @@ class MessageBox(QPlainTextEdit):
                         font: """ + font_size + """;
                         color: """ + font_color + """;
                     }
+                    QScrollBar:vertical {
+                       border-left: 2px solid black;
+                       border-right: 0px solid black;
+                       background: """ + gray_color + """;
+                       width: 25px;
+                       margin: 15px 0 15px 0;
+                       border-radius: 0px;
+                    }
+                    QScrollBar::handle:vertical {
+                       background-color: """ + handle_color + """;
+                       min-height: 30px;
+                    }
+                    QScrollBar::handle:vertical:hover {
+                       background-color: """ + white_color + """;
+                    }
+                    QScrollBar::handle:vertical:pressed {
+                       background-color: """ + deep_white_color + """;
+                    }
+                    QScrollBar::sub-line:vertical {
+                       border-left: 2px solid black;
+                       background-color: """ + button_color + """;
+                       height: 15px;
+                       subcontrol-position: top;
+                       subcontrol-origin: margin;
+                    }
+                    QScrollBar::sub-line:vertical:hover {
+                       background-color: """ + deep_white_color + """;
+                    }
+                    QScrollBar::sub-line:vertical:pressed {
+                       background-color: """ + light_gray_color + """;
+                    }
+                    QScrollBar::add-line:vertical {
+                       border-left: 2px solid black;
+                       background-color: """ + button_color + """;
+                       height: 15px;
+                       subcontrol-position: bottom;
+                       subcontrol-origin: margin;
+                    }
+                    QScrollBar::add-line:vertical:hover {
+                       background-color: """ + deep_white_color + """;
+                    }
+                    QScrollBar::add-line:vertical:pressed { 
+                       background-color: """ + light_gray_color + """;
+                    }
+                    QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+                       background: none;
+                    }
+                    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                       background: none;
+                    }
                     """
         self.setStyleSheet(self.info)
 
@@ -283,12 +333,14 @@ class Slider(QSlider):
                         border: 0px solid black;
                     }
                     QSlider::groove:horizontal  {
-                        border: 2px solid """ + str(black_color) + """;
+                        background: """ + light_gray_color + """;
                         height: 10px;
                     }
                     QSlider::handle:horizontal  {
-                        background: """ + str(handle_color) + """;
-                        width: 10px;
+                        background: """ + handle_color + """;
+                        border: 2px solid """ + black_color + """;
+                        width: 15px;
+                        height: 50px;
                         margin: -12px -1px;
                         border-radius: 1px;
                     }
@@ -296,10 +348,10 @@ class Slider(QSlider):
                         background: qlineargradient(0, 0, 0, 1, 0, #B1B1B1, 1, #c4c4c4);
                     }
                     QSlider::sub-page:horizontal  {
-                        background: """ + str(handle_hover_color) + """;
+                        background: """ + handle_color + """;
                     }
                     QSlider::handle:horizontal:hover  {
-                        background: """ + str(handle_hover_color) + """;
+                        background: """ + deep_white_color + """;
                     }
                     """
         self.setStyleSheet(self.info)

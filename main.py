@@ -37,7 +37,7 @@ def convert_playlist(urls, file_root, info_root, icon_root, extension):
         if g_pytube_trigger:
             yt = YouTube(i, on_progress_callback=on_progress)
 
-            name = str(cnt) + ' ' + str(yt.author) + ' ' + str(yt.title)
+            name = str(cnt).zfill(3) + ' ' + str(yt.author) + ' ' + str(yt.title)
             name = name.replace('/', '')
             name = name.replace('?', '')
             name = name.replace('"', '')
@@ -47,7 +47,7 @@ def convert_playlist(urls, file_root, info_root, icon_root, extension):
             fn = name + extension
             print(i, fn)
 
-            f = open(os.getcwd() + info_root + '/' + str(cnt) + '.txt', 'w', encoding='UTF-8')
+            f = open(os.getcwd() + info_root + '/' + str(cnt).zfill(3) + '.txt', 'w', encoding='UTF-8')
             f.write(name + '.mp3' + '\n')
             f.write(str(yt.author) + '\n')
             f.write(str(yt.title) + '\n')
@@ -58,7 +58,7 @@ def convert_playlist(urls, file_root, info_root, icon_root, extension):
             yt.streams.filter().get_audio_only().download(output_path=os.getcwd() + file_root, filename=fn)
 
             img_data = requests.get(str(yt.thumbnail_url)).content
-            with open(os.getcwd() + icon_root + '/' + str(cnt) + '.jpg', 'wb') as handler:
+            with open(os.getcwd() + icon_root + '/' + str(cnt).zfill(3) + '.jpg', 'wb') as handler:
                 handler.write(img_data)
 
             cnt += 1
@@ -162,7 +162,7 @@ class BottomView(QWidget):
         self.unit_h = self.size_handler.unit_h
         self.button_w = self.size_handler.button_w
         self.button_h = self.size_handler.button_h
-        self.widget_w = 700
+        self.widget_w = 750
         self.widget_h = 800
         self.label_style = """
                            border: 0px;
@@ -349,10 +349,10 @@ class BottomView(QWidget):
                                         min-height: 30px;
                                      }
                                      QScrollBar::handle:vertical:hover {
-                                        background-color: """ + deep_white_color + """;
+                                        background-color: """ + white_color + """;
                                      }
                                      QScrollBar::handle:vertical:pressed {
-                                        background-color: """ + light_gray_color + """;
+                                        background-color: """ + deep_white_color + """;
                                      }
                                      QScrollBar::sub-line:vertical {
                                         border-left: 2px solid black;
@@ -386,7 +386,11 @@ class BottomView(QWidget):
                                      QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
                                         background: none;
                                      }
+                                     QScrollBar:horizontal {
+                                        height: 0px;
+                                     }
                                      """)
+        self.song_list.horizontalScrollBar().hide()
         self.next_button = Button('Next',
                                   self.button_w,
                                   self.button_h,
@@ -471,6 +475,7 @@ class BottomView(QWidget):
         self.layout_player_button.addWidget(self.pause_button)
         self.layout_player_button.addWidget(self.next_button)
         self.layout_player.addItem(self.layout_player_button)
+        self.layout_player.addStretch(1)
         self.widget_player = QWidget()
         self.widget_player.setFixedWidth(self.widget_w * 1.2)
         self.widget_player.setFixedHeight(self.widget_h)
@@ -551,7 +556,6 @@ class BottomView(QWidget):
         self.progress_bar.setValue(0)
         self.progress_bar_timer.stop()
         self.player.stop()
-        print("stop finish")
 
     def pause(self):
         self.progress_bar_timer.stop()
@@ -596,17 +600,14 @@ class BottomView(QWidget):
         self.play()
 
     def play_at_current_time(self):
-        print(self.progress_bar.value(), self.pre_progress_bar_value)
         if abs(self.progress_bar.value() - self.pre_progress_bar_value) <= 1:
             if self.time_is_adjusted:
-                print("Handling Start", self.current_time, self.progress_bar.value())
                 self.progress_bar.valueChanged.disconnect()
                 self.time_is_adjusted = False
                 cur = self.current_time
                 self.progress_bar_timer.stop()
                 self.player.stop()
                 self.progress_bar.setValue(cur)
-                # self.pre_progress_bar_value = cur - 1
                 self.progress_bar_timer.start(1000)
                 m = str(int(cur // 60))
                 s = str(int(cur % 60)).zfill(2)
@@ -617,14 +618,12 @@ class BottomView(QWidget):
         else:
             if not self.time_is_adjusted:
                 self.time_is_adjusted = True
-                print("Set flag")
             self.progress_bar_timer.stop()
             self.current_time = self.progress_bar.value()
             m = str(int(self.current_time // 60))
             s = str(int(self.current_time % 60)).zfill(2)
             self.current_time_label.setText(m + ':' + s)
             self.progress_bar_timer.start(1000)
-            print("movvvvvv")
 
     def update_progress_bar(self):
         self.current_time += 1
@@ -633,6 +632,13 @@ class BottomView(QWidget):
         self.current_time_label.setText(m + ':' + s)
         self.pre_progress_bar_value = self.current_time - 1
         self.progress_bar.setValue(self.current_time)
+
+        if self.current_time == int(self.player.music_length):
+            self.progress_bar_timer.stop()
+            self.progress_bar.setValue(0)
+            self.current_time_label.setText('0:00')
+            self.music_length_label.setText('0:00')
+            self.play_button.toggle_button()
 
     def set_playlist(self):
         self.playlist = self.playlist_edit.text()
@@ -665,7 +671,7 @@ class BottomView(QWidget):
     def update_pytube_status(self):
         max_len = len(os.listdir(os.getcwd() + self.mp4_root))
         if max_len != self.mp4_max_cnt:
-            f = open(os.getcwd() + self.info_root + '/' + str(max_len) + '.txt', 'r', encoding='UTF-8')
+            f = open(os.getcwd() + self.info_root + '/' + str(max_len).zfill(3) + '.txt', 'r', encoding='UTF-8')
             content = f.read()
             content = content.splitlines()
             f.close
