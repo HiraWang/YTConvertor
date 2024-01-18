@@ -16,8 +16,8 @@ from music_player import *
 from utility import *
 from ui_unit import *
 
-pytube_trigger = True
-pydub_trigger = True
+g_pytube_trigger = True
+g_pydub_trigger = True
 
 
 def exit_exe(self):
@@ -34,7 +34,7 @@ def convert_playlist(urls, file_root, info_root, icon_root, extension):
     cnt = 1
     tot_cnt = len(urls)
     for i in urls:
-        if pytube_trigger:
+        if g_pytube_trigger:
             yt = YouTube(i, on_progress_callback=on_progress)
 
             name = str(cnt) + ' ' + str(yt.author) + ' ' + str(yt.title)
@@ -73,7 +73,7 @@ def convert_audio(mp4_root, mp3_root, extension_mp4, extension_mp3):
     extension_mp3 = extension_mp3.replace('.', '')
 
     for file in os.listdir(os.getcwd() + mp4_root):
-        if pydub_trigger:
+        if g_pydub_trigger:
             filename = os.fsdecode(file)
             if filename.endswith(extension_mp4):
                 filename_in = os.getcwd().replace('/', '\\') + mp4_root.replace('/', '\\') + '\\' + filename
@@ -436,9 +436,11 @@ class BottomView(QWidget):
                                            icon_default=IMAGE_PAUSE_BLANK,
                                            icon_pressed=IMAGE_PLAY_BLANK)
         self.progress_bar = Slider(self.widget_w, self.label_h, 0, 100)
-        # self.progress_bar.valueChanged.connect(self.set_period_edit_box_by_slider)
+        self.progress_bar.valueChanged.connect(self.play_at_current_time)
         self.progress_bar_timer = QTimer()
         self.progress_bar_timer.timeout.connect(self.update_progress_bar)
+        self.pre_progress_bar_value = 0
+        self.time_is_adjusted = False
 
         self.current_time = 0
         self.current_time_label = QLabel(self)
@@ -531,29 +533,32 @@ class BottomView(QWidget):
         self.update_list_widget()
         self.player.add_songs()
 
-    def play(self):
+    def play(self, start=0):
         self.player.set()
         m = str(int(self.player.music_length // 60))
         s = str(int(self.player.music_length % 60)).zfill(2)
         self.music_length_label.setText(m + ':' + s)
         self.progress_bar.setMaximum(self.player.music_length)
         self.progress_bar_timer.start(1000)
-        self.player.play()
+        self.player.play(start)
 
     def stop(self):
         self.current_time = 0
+        self.pre_progress_bar_value = 0
+        self.time_is_adjusted = False
         self.current_time_label.setText('0:00')
         self.music_length_label.setText('0:00')
         self.progress_bar.setValue(0)
         self.progress_bar_timer.stop()
         self.player.stop()
+        print("stop finish")
 
     def pause(self):
-        self.progress_bar_timer.start(1000)
+        self.progress_bar_timer.stop()
         self.player.pause()
 
     def resume(self):
-        self.progress_bar_timer.stop()
+        self.progress_bar_timer.start(1000)
         self.player.resume()
 
     def previous(self):
@@ -590,12 +595,44 @@ class BottomView(QWidget):
 
         self.play()
 
+    def play_at_current_time(self):
+        print(self.progress_bar.value(), self.pre_progress_bar_value)
+        if abs(self.progress_bar.value() - self.pre_progress_bar_value) <= 1:
+            if self.time_is_adjusted:
+                print("Handling Start", self.current_time, self.progress_bar.value())
+                self.progress_bar.valueChanged.disconnect()
+                self.time_is_adjusted = False
+                cur = self.current_time
+                self.progress_bar_timer.stop()
+                self.player.stop()
+                self.progress_bar.setValue(cur)
+                # self.pre_progress_bar_value = cur - 1
+                self.progress_bar_timer.start(1000)
+                m = str(int(cur // 60))
+                s = str(int(cur % 60)).zfill(2)
+                self.current_time_label.setText(m + ':' + s)
+                self.progress_bar.valueChanged.connect(self.play_at_current_time)
+                self.play(cur)
+            return
+        else:
+            if not self.time_is_adjusted:
+                self.time_is_adjusted = True
+                print("Set flag")
+            self.progress_bar_timer.stop()
+            self.current_time = self.progress_bar.value()
+            m = str(int(self.current_time // 60))
+            s = str(int(self.current_time % 60)).zfill(2)
+            self.current_time_label.setText(m + ':' + s)
+            self.progress_bar_timer.start(1000)
+            print("movvvvvv")
+
     def update_progress_bar(self):
         self.current_time += 1
         m = str(int(self.current_time // 60))
         s = str(int(self.current_time % 60)).zfill(2)
         self.current_time_label.setText(m + ':' + s)
-        self.progress_bar.setValue(self.progress_bar.value() + 1)
+        self.pre_progress_bar_value = self.current_time - 1
+        self.progress_bar.setValue(self.current_time)
 
     def set_playlist(self):
         self.playlist = self.playlist_edit.text()
@@ -636,8 +673,8 @@ class BottomView(QWidget):
             self.mp4_max_cnt = max_len
 
     def start_pytube(self):
-        global pytube_trigger
-        pytube_trigger = True
+        global g_pytube_trigger
+        g_pytube_trigger = True
 
         playlist = self.playlist_edit.text()
         playlist = Playlist(playlist)
@@ -653,8 +690,8 @@ class BottomView(QWidget):
         self.timer_pytube.start(1)
 
     def stop_pytube(self):
-        global pytube_trigger
-        pytube_trigger = False
+        global g_pytube_trigger
+        g_pytube_trigger = False
         self.thread_pytube.join()
         self.timer_pytube.stop()
 
@@ -673,8 +710,8 @@ class BottomView(QWidget):
             self.mp3_max_cnt = max_len
 
     def start_pydub(self):
-        global pydub_trigger
-        pydub_trigger = True
+        global g_pydub_trigger
+        g_pydub_trigger = True
 
         self.init_pydub()
         self.thread_pydub = threading.Thread(target=convert_audio, args=(self.mp4_root, self.mp3_root, self.extension_mp4, self.extension_mp3))
@@ -682,8 +719,8 @@ class BottomView(QWidget):
         self.timer_pydub.start(1)
 
     def stop_pydub(self):
-        global pydub_trigger
-        pydub_trigger = False
+        global g_pydub_trigger
+        g_pydub_trigger = False
         self.thread_pydub.join()
         self.timer_pydub.stop()
 

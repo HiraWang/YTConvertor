@@ -52,8 +52,8 @@ class MusicPlayer:
         self.music_length = self.get_music_length()
         mixer.music.load(self.song)
 
-    def play(self):
-        mixer.music.play()
+    def play(self, start=0):
+        mixer.music.play(start=start)
         self.visualizer = AudioVisualizer(self.song)
         self.music_length = self.get_music_length()
         # p = multiprocessing.Process(target=AudioVisualizer, args=(song,))
