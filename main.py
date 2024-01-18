@@ -3,6 +3,8 @@ import shutil
 import threading
 import requests
 import subprocess
+
+from pydub import AudioSegment
 from pytube import Playlist
 from pytube import YouTube
 from music_player import *
@@ -82,11 +84,12 @@ def convert_audio(mp4_root, mp3_root, extension_mp4, extension_mp3):
 
 
 class UpperView(QWidget):
-    def __init__(self, window, device, size):
+    def __init__(self, window, bottom, size):
         super().__init__()
 
         # New widgets
         self.window = window
+        self.bottom = bottom
         self.size_handler = SizeHandler(UPPER_VIEW, size)
         self.layout = QHBoxLayout()
         self.setStyleSheet("""
@@ -114,20 +117,40 @@ class UpperView(QWidget):
                                   font_color=white_color,
                                   is_icon=True,
                                   icon=IMAGE_EXIT)
+        self.eruhi_button = ButtonTwoState('ERUHI', 'CONVERTER',
+                                           self.size_handler.button_w,
+                                           self.size_handler.button_w,
+                                           self.show_eruhi,
+                                           self.show_converter,
+                                           color=white_color,
+                                           hover_color=light_gray_color,
+                                           pressed_color=gray_color,
+                                           font_size=self.size_handler.font_size,
+                                           font_color=white_color,
+                                           is_icon=True,
+                                           icon_default=IMAGE_SHOW_FULL_SCREEN,
+                                           icon_pressed=IMAGE_SHOW_NORMAL)
 
-        pixmap = QPixmap(os.getcwd() + IMAGE_MET_LOGO)
+        pixmap = QPixmap(os.getcwd() + IMAGE_ERUHI_LOGO)
         self.logo = QLabel()
         self.logo.setPixmap(pixmap)
         self.logo.show()
 
         self.layout.addStretch(10)
         self.layout.addWidget(self.exit_button, alignment=Qt.AlignRight)
+        self.layout.addWidget(self.eruhi_button, alignment=Qt.AlignRight)
         self.layout.addWidget(self.logo, alignment=Qt.AlignRight)
         self.setLayout(self.layout)
 
+    def show_eruhi(self):
+        self.bottom.show_eruhi()
+
+    def show_converter(self):
+        self.bottom.show_converter()
+
 
 class BottomView(QWidget):
-    def __init__(self, window, device, size):
+    def __init__(self, window, size):
         super().__init__()
         self.window = window
         self.tot_cnt = 0
@@ -480,6 +503,31 @@ class BottomView(QWidget):
         self.layout.addWidget(self.widget_player, alignment=Qt.AlignRight | Qt.AlignBottom)
         self.setLayout(self.layout)
 
+    def show_eruhi(self):
+        while self.layout_convertor.count():
+            child = self.layout_convertor.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+
+        label = QLabel(self)
+        label.setStyleSheet("""
+                            background: """ + gray_color + """;
+                            border: 2px solid """ + gray_color + """;
+                            """)
+        pixmap = QPixmap(IMAGE_ERUHI)
+        label.setFixedWidth(pixmap.width() + 210)
+        label.setFixedHeight(pixmap.height() + 10)
+        label.setPixmap(pixmap)
+        self.layout_convertor.setContentsMargins(0, 0, 0, 0)
+        self.layout_convertor.addWidget(label, alignment=Qt.AlignRight | Qt.AlignVCenter)
+        self.widget_convertor.setLayout(self.layout_convertor)
+
+    def show_converter(self):
+        while self.layout_convertor.count():
+            child = self.layout_convertor.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+
     def create_item(self, name, icon, parent):
         item = QListWidgetItem(parent)
         item.setText(name)
@@ -508,6 +556,7 @@ class BottomView(QWidget):
         for info_file, icon_file in zip(info_files, icon_files):
             info_file = os.getcwd() + self.info_root + '/' + info_file
             icon_file = os.getcwd() + self.icon_root + '/' + icon_file
+            print(info_file)
             f = open(info_file, 'r', encoding='UTF-8')
             content = f.read()
             content = content.splitlines()
@@ -739,7 +788,7 @@ class Window(QMainWindow):
         self.setFixedWidth(w)
         self.setFixedHeight(h)
         icon = QIcon()
-        icon.addFile(os.getcwd() + IMAGE_MET_ICON)
+        icon.addFile(os.getcwd() + IMAGE_ERUHI_ICON)
         self.setWindowIcon(icon)
         self.setStyleSheet("""
                            QMainWindow > QWidget { background-color: """ + gray_color + """; }
@@ -750,8 +799,8 @@ class Window(QMainWindow):
         self._device = None
 
         # Construct upper view
-        self.upper_view = UpperView(self, self._device, size)
-        self.bottom_view = BottomView(self, self._device, size)
+        self.bottom_view = BottomView(self, size)
+        self.upper_view = UpperView(self, self.bottom_view, size)
 
         # Attach views to main layout
         self.main_layout = QVBoxLayout()
