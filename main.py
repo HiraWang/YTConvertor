@@ -412,8 +412,8 @@ class BottomView(QWidget):
         self.play_button = ButtonTwoState('PLAY', 'STOP',
                                           self.button_w,
                                           self.button_h,
-                                          self.player.play,
-                                          self.player.stop,
+                                          self.play,
+                                          self.stop,
                                           color=white_color,
                                           hover_color=handle_color,
                                           pressed_color=handle_pressed_color,
@@ -425,8 +425,8 @@ class BottomView(QWidget):
         self.pause_button = ButtonTwoState('PAUSE', 'RESUME',
                                            self.button_w,
                                            self.button_h,
-                                           self.player.pause,
-                                           self.player.resume,
+                                           self.pause,
+                                           self.resume,
                                            color=white_color,
                                            hover_color=handle_color,
                                            pressed_color=handle_pressed_color,
@@ -435,9 +435,34 @@ class BottomView(QWidget):
                                            is_icon=True,
                                            icon_default=IMAGE_PAUSE_BLANK,
                                            icon_pressed=IMAGE_PLAY_BLANK)
+        self.progress_bar = Slider(self.widget_w, self.label_h, 0, 100)
+        # self.progress_bar.valueChanged.connect(self.set_period_edit_box_by_slider)
+        self.progress_bar_timer = QTimer()
+        self.progress_bar_timer.timeout.connect(self.update_progress_bar)
+
+        self.current_time = 0
+        self.current_time_label = QLabel(self)
+        self.current_time_label.setFixedWidth(self.label_w)
+        self.current_time_label.setFixedHeight(self.label_h)
+        self.current_time_label.setText('0:00')
+        self.current_time_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.current_time_label.setStyleSheet(self.label_style)
+        self.music_length_label = QLabel(self)
+        self.music_length_label.setFixedWidth(self.label_w)
+        self.music_length_label.setFixedHeight(self.label_h)
+        self.music_length_label.setText('0:00')
+        self.music_length_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.music_length_label.setStyleSheet(self.label_style)
 
         self.layout_player = QVBoxLayout()
         self.layout_player.addWidget(self.song_list, alignment=Qt.AlignTop)
+        self.layout_player_bar = QHBoxLayout()
+        self.layout_player_bar.addWidget(self.current_time_label, alignment=Qt.AlignRight)
+        self.layout_player_bar.addWidget(self.progress_bar, alignment=Qt.AlignCenter)
+        self.layout_player_bar.addWidget(self.music_length_label, alignment=Qt.AlignLeft)
+        self.layout_player.addStretch(1)
+        self.layout_player.addItem(self.layout_player_bar)
+        self.layout_player.addStretch(1)
         self.layout_player_button = QHBoxLayout()
         self.layout_player_button.addWidget(self.previous_button)
         self.layout_player_button.addWidget(self.play_button)
@@ -506,8 +531,33 @@ class BottomView(QWidget):
         self.update_list_widget()
         self.player.add_songs()
 
+    def play(self):
+        self.player.set()
+        m = str(int(self.player.music_length // 60))
+        s = str(int(self.player.music_length % 60)).zfill(2)
+        self.music_length_label.setText(m + ':' + s)
+        self.progress_bar.setMaximum(self.player.music_length)
+        self.progress_bar_timer.start(1000)
+        self.player.play()
+
+    def stop(self):
+        self.current_time = 0
+        self.current_time_label.setText('0:00')
+        self.music_length_label.setText('0:00')
+        self.progress_bar.setValue(0)
+        self.progress_bar_timer.stop()
+        self.player.stop()
+
+    def pause(self):
+        self.progress_bar_timer.start(1000)
+        self.player.pause()
+
+    def resume(self):
+        self.progress_bar_timer.stop()
+        self.player.resume()
+
     def previous(self):
-        # self.player.stop()
+        self.stop()
 
         if self.mp3_max_cnt == 0:
             return
@@ -521,10 +571,10 @@ class BottomView(QWidget):
         self.song_list.setCurrentItem(self.song_list.item(row))
         self.song_list.currentItem().setSelected(True)
 
-        # self.player.play()
+        self.play()
 
     def next(self):
-        # self.player.stop()
+        self.stop()
 
         if self.mp3_max_cnt == 0:
             return
@@ -538,7 +588,14 @@ class BottomView(QWidget):
         self.song_list.setCurrentItem(self.song_list.item(row))
         self.song_list.currentItem().setSelected(True)
 
-        # self.player.play()
+        self.play()
+
+    def update_progress_bar(self):
+        self.current_time += 1
+        m = str(int(self.current_time // 60))
+        s = str(int(self.current_time % 60)).zfill(2)
+        self.current_time_label.setText(m + ':' + s)
+        self.progress_bar.setValue(self.progress_bar.value() + 1)
 
     def set_playlist(self):
         self.playlist = self.playlist_edit.text()

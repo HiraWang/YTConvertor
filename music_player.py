@@ -23,6 +23,7 @@ class MusicPlayer:
         # init mixer para
         mixer.init()
 
+        self.song = None
         self.list = list
         self.list_cnt = 0
         self.file_root = file_root
@@ -30,6 +31,7 @@ class MusicPlayer:
         self.visualizer = None
         self.song_list = []
         self.add_songs()
+        self.music_length = 0
 
     # add many songs to the playlist
     def add_songs(self):
@@ -45,11 +47,15 @@ class MusicPlayer:
         curr_song = self.songs_list.curselection()
         self.songs_list.delete(curr_song[0])
 
+    def set(self):
+        self.song = os.getcwd() + self.file_root + '/' + self.list.currentItem().text()
+        self.music_length = self.get_music_length()
+        mixer.music.load(self.song)
+
     def play(self):
-        song = os.getcwd() + self.file_root + '/' + self.list.currentItem().text()
-        mixer.music.load(song)
         mixer.music.play()
-        self.visualizer = AudioVisualizer(song)
+        self.visualizer = AudioVisualizer(self.song)
+        self.music_length = self.get_music_length()
         # p = multiprocessing.Process(target=AudioVisualizer, args=(song,))
         # p.start()
 
@@ -68,3 +74,9 @@ class MusicPlayer:
     def alwaysOnTop(self):
         putty = pygetwindow.getWindowsWithTitle('pygame')[0]
         putty.activate()
+
+    def get_current_time(self):
+        return mixer.music.get_pos()
+
+    def get_music_length(self):
+        return pygame.mixer.Sound(self.song).get_length()
