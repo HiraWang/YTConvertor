@@ -636,6 +636,7 @@ class BottomView(QWidget):
             self.current_time_label.setText('0:00')
             self.music_length_label.setText('0:00')
             self.play_button.toggle_button()
+            self.next()
 
     def set_playlist(self):
         self.playlist = self.playlist_edit.text()
