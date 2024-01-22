@@ -1,10 +1,16 @@
 import os
 import time
+import platform
 import numpy as np
 import multiprocessing
 from PySide2.QtGui import QMovie
 from PySide2.QtCore import Qt, QThread, Signal
 from PySide2.QtWidgets import QLabel, QDialog, QVBoxLayout
+
+if platform.system() == 'Windows':
+    DIR_CHAR = '\\'
+else:
+    DIR_CHAR = '/'
 
 UPPER_VIEW = 0
 BOTTOM_VIEW = 1

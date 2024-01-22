@@ -3,15 +3,16 @@ from os.path import isfile, join
 from pygame import *
 from tkinter import *
 from audio_visualizer import *
+from utility import *
 import pygetwindow
 
 
 class MusicPlayer:
     def __init__(self, list, file_root):
         # creating the root window
-        self.root = Tk()
-        self.root.title('DataFlair Music player App ')
-        self.root.withdraw()
+        # self.root = Tk()
+        # self.root.title('DataFlair Music player App ')
+        # self.root.withdraw()
 
         # init mixer para
         mixer.init()
@@ -29,9 +30,11 @@ class MusicPlayer:
     # add many songs to the playlist
     def add_songs(self):
         temp_song = ()
-        files = [f for f in listdir(self.root_path) if isfile(join(self.root_path, f))]
+        if not os.path.isdir(self.root_path):
+            return
+        files = [f for f in sorted(listdir(self.root_path)) if isfile(join(self.root_path, f))]
         for file in files:
-            file = self.root_path.replace('/', '\\') + '\\' + file
+            file = self.root_path.replace('/', DIR_CHAR) + DIR_CHAR + file
             temp_song = temp_song + (file,)
             self.song_list.append(temp_song)
         # print("songs added")

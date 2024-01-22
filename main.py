@@ -67,13 +67,14 @@ def convert_audio(mp4_root, mp3_root, extension_mp4, extension_mp3):
     extension_mp4 = extension_mp4.replace('.', '')
     extension_mp3 = extension_mp3.replace('.', '')
 
-    for file in os.listdir(os.getcwd() + mp4_root):
+    for file in sorted(os.listdir(os.getcwd() + mp4_root)):
         if g_pydub_trigger:
             filename = os.fsdecode(file)
+            print(filename)
             if filename.endswith(extension_mp4):
-                filename_in = os.getcwd().replace('/', '\\') + mp4_root.replace('/', '\\') + '\\' + filename
+                filename_in = os.getcwd().replace('/', DIR_CHAR) + mp4_root.replace('/', DIR_CHAR) + DIR_CHAR + filename
                 sound = AudioSegment.from_file(filename_in, extension_mp4)
-                filename_out = os.getcwd().replace('/', '\\') + mp3_root.replace('/', '\\') + '\\' + filename.replace(extension_mp4, extension_mp3)
+                filename_out = os.getcwd().replace('/', DIR_CHAR) + mp3_root.replace('/', DIR_CHAR) + DIR_CHAR + filename.replace(extension_mp4, extension_mp3)
                 sound.export(filename_out, format=extension_mp3)
             else:
                 continue
@@ -340,6 +341,7 @@ class BottomView(QWidget):
         self.song_list.setFixedHeight(500)
         self.song_list.setStyleSheet("""
                                      QListWidget{
+                                        font: 24px;
                                         border-radius: 0px;
                                         color: """ + deep_gray_color + """;
                                         background: """ + light_gray_color + """;
@@ -538,9 +540,11 @@ class BottomView(QWidget):
         return item
 
     def get_info_and_icon_files(self):
-        info_files = [f for f in listdir(os.getcwd() + self.info_root) if isfile(join(os.getcwd() + self.info_root, f))]
-        icon_files = [f for f in listdir(os.getcwd() + self.icon_root) if isfile(join(os.getcwd() + self.icon_root, f))]
-        mp3_files = [f for f in listdir(os.getcwd() + self.mp3_root) if isfile(join(os.getcwd() + self.mp3_root, f))]
+        if not os.path.isdir(os.getcwd() + self.info_root):
+            return [], [], 0
+        info_files = [f for f in sorted(listdir(os.getcwd() + self.info_root)) if isfile(join(os.getcwd() + self.info_root, f))]
+        icon_files = [f for f in sorted(listdir(os.getcwd() + self.icon_root)) if isfile(join(os.getcwd() + self.icon_root, f))]
+        mp3_files = [f for f in sorted(listdir(os.getcwd() + self.mp3_root)) if isfile(join(os.getcwd() + self.mp3_root, f))]
         info_cnt = len(info_files)
         icon_cnt = len(icon_files)
         mp3_cnt = len(mp3_files)
@@ -553,15 +557,17 @@ class BottomView(QWidget):
     def update_list_widget(self):
         info_files, icon_files, mp3_cnt = self.get_info_and_icon_files()
         self.mp3_max_cnt = mp3_cnt
-        for info_file, icon_file in zip(info_files, icon_files):
-            info_file = os.getcwd() + self.info_root + '/' + info_file
-            icon_file = os.getcwd() + self.icon_root + '/' + icon_file
-            f = open(info_file, 'r', encoding='UTF-8')
-            content = f.read()
-            content = content.splitlines()
-            self._list_items.append(self.create_item(content[0],
-                                                     icon_file,
-                                                     self.song_list))
+
+        if self.mp3_max_cnt != 0:
+            for info_file, icon_file in zip(info_files, icon_files):
+                info_file = os.getcwd() + self.info_root + '/' + info_file
+                icon_file = os.getcwd() + self.icon_root + '/' + icon_file
+                f = open(info_file, 'r', encoding='UTF-8')
+                content = f.read()
+                content = content.splitlines()
+                self._list_items.append(self.create_item(content[0],
+                                                         icon_file,
+                                                         self.song_list))
 
         self.song_list.setCurrentRow(0)
         self.song_list.setViewMode(QListView.ListMode)
@@ -708,11 +714,11 @@ class BottomView(QWidget):
         self.mp4_max_cnt = 0
         self.msg_box_pytube.clear()
         shutil.rmtree(os.getcwd() + self.mp4_root, ignore_errors=True)
-        os.mkdir(os.getcwd() + self.mp4_root)
+        os.makedirs(os.getcwd() + self.mp4_root)
         shutil.rmtree(os.getcwd() + self.info_root, ignore_errors=True)
-        os.mkdir(os.getcwd() + self.info_root)
+        os.makedirs(os.getcwd() + self.info_root)
         shutil.rmtree(os.getcwd() + self.icon_root, ignore_errors=True)
-        os.mkdir(os.getcwd() + self.icon_root)
+        os.makedirs(os.getcwd() + self.icon_root)
 
     def update_pytube_status(self):
         max_len = len(os.listdir(os.getcwd() + self.mp4_root))
@@ -756,7 +762,7 @@ class BottomView(QWidget):
     def update_pydub_status(self):
         max_len = len(os.listdir(os.getcwd() + self.mp3_root))
         if max_len != self.mp3_max_cnt:
-            files = [f for f in listdir(os.getcwd() + self.mp3_root) if isfile(join(os.getcwd() + self.mp3_root, f))]
+            files = [f for f in sorted(listdir(os.getcwd() + self.mp3_root)) if isfile(join(os.getcwd() + self.mp3_root, f))]
             file = files[-1]
             self.msg_box_pydub.append_text(file)
             self.mp3_max_cnt = max_len
@@ -804,7 +810,7 @@ class Window(QMainWindow):
         # Attach views to main layout
         self.main_layout = QVBoxLayout()
         self.main_layout.addWidget(self.upper_view)
-        self.main_layout.addWidget(self.bottom_view)
+        self.main_layout.addWidget(self.bottom_view, alignment=Qt.AlignTop)
         self.main.setLayout(self.main_layout)
 
         # Attach main widget to window
@@ -828,9 +834,11 @@ if __name__ == "__main__":
         screen = screens[0]
     geometry = screen.geometry()
     size = screen.size()
+    print(size)
 
-    window = Window(size, 1200, 900)
-    window.center(size)
+    window = Window(size, 1920, 1080)
+    window.move(geometry.left(), geometry.top())
+    window.showMaximized()
     window.showFullScreen()
-
+    # window.show()
     sys.exit(app.exec_())
