@@ -215,6 +215,7 @@ class BottomView(QWidget):
         self.playlist_label.setStyleSheet(self.label_style)
         self.playlist_edit = QLineEdit(self)
         self.playlist_edit.setStyleSheet(self.line_edit_style)
+        self.playlist_edit.setDisabled(True)
         self.playlist_edit.setFixedWidth(self.edit_w)
         self.playlist_edit.setFixedHeight(self.edit_h)
         self.playlist_set_button = ButtonRect('SET',
