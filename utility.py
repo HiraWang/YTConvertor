@@ -9,8 +9,12 @@ from PySide2.QtWidgets import QLabel, QDialog, QVBoxLayout
 
 if platform.system() == 'Windows':
     DIR_CHAR = '\\'
+    SCREEN_W = 1920
+    SCREEN_H = 1080
 else:
     DIR_CHAR = '/'
+    SCREEN_W = 2880
+    SCREEN_H = 1800
 
 UPPER_VIEW = 0
 BOTTOM_VIEW = 1
