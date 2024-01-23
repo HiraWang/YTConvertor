@@ -2,3 +2,5 @@ Music/
 Info/
 Icon/
 ff*.exe
+*pycache*
+__pycache__/*
