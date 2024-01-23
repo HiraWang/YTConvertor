@@ -1,3 +1,4 @@
+import threading
 from os import listdir
 from os.path import isfile, join
 from pygame import *
@@ -51,9 +52,11 @@ class MusicPlayer:
     def play(self, start=0):
         mixer.music.play(start=start)
         self.visualizer = AudioVisualizer(self.song)
-        self.music_length = self.get_music_length()
-        # p = multiprocessing.Process(target=AudioVisualizer, args=(song,))
+        # t = threading.Thread(target=AudioVisualizer, args=(self.song,))
+        # t.start()
+        # p = multiprocessing.Process(target=AudioVisualizer, args=(self.song,))
         # p.start()
+        self.music_length = self.get_music_length()
 
     def stop(self):
         mixer.music.stop()
