@@ -837,7 +837,7 @@ if __name__ == "__main__":
     size = screen.size()
     print(size)
 
-    window = Window(size, SCREEN_W, SCREEN_H)
+    window = Window(size, size.width(), size.height())
     window.move(geometry.left(), geometry.top())
     window.showMaximized()
     window.showFullScreen()
