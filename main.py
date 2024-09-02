@@ -829,7 +829,7 @@ if __name__ == "__main__":
     app.setFont(font)
 
     screens = app.screens()
-    if len(screens) > 1 and platform.system() == 'Windows':
+    if len(screens) > 1 or platform.system() == 'Windows':
         screen = screens[1]
     else:
         screen = screens[0]
